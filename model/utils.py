@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+import random
+import os
 
 #loss
 def nll(E, NUM_E):
@@ -28,3 +30,9 @@ def avgcindex(Cindex,cancer_types,numbers):
         
     avgci= np.array(cisum).sum()/np.array(numbers).sum()
     return avgci
+
+def setup_seed(seed):
+    random.seed(seed)  # 为python set random seed
+    np.random.seed(seed)  # 为numpy set random seed
+    tf.random.set_seed(seed)  # tf cpu fix seed
+#     os.environ['TF_DETERMINISTIC_OPS'] = '1'  # tf gpu fix seed, please `pip install tensorflow-determinism` first

@@ -1,4 +1,6 @@
 
+__author__ = 'Sungsoo Park'
+
 class WxHyperParameter(object):
     """
     wx feature selector hyperparameters

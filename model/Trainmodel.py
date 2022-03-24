@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 from model import cnncox,dcnncox,nncox
 from earlystoping import MyCallback
-from utils import nll,avgcindex
+from utils import nll,avgcindex,setup_seed
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold,train_test_split
 from lifelines.utils import concordance_index
 
-def traincnncoxmodel(output_path,cancer_name,conv1,conv1_size,conv2,conv2_size,dense,input_shape,save_path,le, wi): 
-
+def traincnncoxmodel(output_path,cancer_name,conv1,conv1_size,conv2,conv2_size,dense,input_shape,save_path,le, wi,seed): 
+    setup_seed(seed)
     #data
     df_exp=pd.read_csv(output_path,index_col=0)
     gene_exp=df_exp.dropna(axis=0,subset = ["OS", "OS.time"])
@@ -27,7 +27,9 @@ def traincnncoxmodel(output_path,cancer_name,conv1,conv1_size,conv2,conv2_size,d
         ci_tst_list = []
         ci_dev_list = []
         kf = StratifiedKFold(n_splits=5,random_state=1,shuffle=True)
+        fold = 0
         for trn_index, tst_index in kf.split(X,E):
+            fold +=1
             x_tst=X[tst_index]
             c_tst=E[tst_index]
             s_tst=Y[tst_index]
@@ -50,7 +52,7 @@ def traincnncoxmodel(output_path,cancer_name,conv1,conv1_size,conv2,conv2_size,d
         
             #fit
             data = (x_trn, c_trn, s_trn, x_dev, c_dev, s_dev)
-            modelpath = save_path+"%s%s.hdf5" % (le*wi,cancer_name)
+            modelpath = save_path+"%s_fold_%s_repeat_%s_%s.hdf5" % (cancer_name,fold,i+1,le*wi)
             checkpoint = MyCallback(modelpath, data)
             
             model = cnncox(conv1,conv1_size,conv2,conv2_size,dense,input_shape)
@@ -74,12 +76,12 @@ def traincnncoxmodel(output_path,cancer_name,conv1,conv1_size,conv2,conv2_size,d
         score_tst_list.append(ci_tst_list)
 
         print('C-index:{:.4f}'.format(np.mean(ci_tst_list)),'+/-:{:.4f}'.format(np.std(ci_tst_list)))
-    print(cancer_name,np.mean(score_tst_list))
+    print(cancer_name,np.mean(score_tst_list),np.std(score_tst_list))
     return score_tst_list
 
 
-def traindcnncoxmodel(output_path,cancer_name,conv1,conv1_size,dense,input_shape,save_path,le, wi): 
-
+def traindcnncoxmodel(output_path,cancer_name,conv1,conv1_size,dense,input_shape,save_path,le, wi,seed): 
+    setup_seed(seed)
     #data
     df_exp=pd.read_csv(output_path,index_col=0)
     gene_exp=df_exp.dropna(axis=0,subset = ["OS", "OS.time"])
@@ -96,7 +98,9 @@ def traindcnncoxmodel(output_path,cancer_name,conv1,conv1_size,dense,input_shape
         ci_tst_list = []
         ci_dev_list = []
         kf = StratifiedKFold(n_splits=5,random_state=1,shuffle=True)
+        fold = 0
         for trn_index, tst_index in kf.split(X,E):
+            fold +=1
             x_tst=X[tst_index]
             c_tst=E[tst_index]
             s_tst=Y[tst_index]
@@ -119,7 +123,7 @@ def traindcnncoxmodel(output_path,cancer_name,conv1,conv1_size,dense,input_shape
         
             #fit
             data = (x_trn, c_trn, s_trn, x_dev, c_dev, s_dev)
-            modelpath = save_path+"%s%s.hdf5" % (le*wi,cancer_name)
+            modelpath = save_path+"%s_fold_%s_repeat_%s_%s.hdf5" % (cancer_name,fold,i+1,le*wi)
             checkpoint = MyCallback(modelpath, data)
             
             model = dcnncox(conv1,conv1_size,dense,input_shape)
@@ -143,6 +147,6 @@ def traindcnncoxmodel(output_path,cancer_name,conv1,conv1_size,dense,input_shape
         score_tst_list.append(ci_tst_list)
 
         print('C-index:{:.4f}'.format(np.mean(ci_tst_list)),'+/-:{:.4f}'.format(np.std(ci_tst_list)))
-    print(cancer_name,np.mean(score_tst_list))
+    print(cancer_name,np.mean(score_tst_list),np.std(score_tst_list))
     return score_tst_list
 
