@@ -1,5 +1,7 @@
 
+"""
 __author__ = 'Sungsoo Park'
+"""
 
 class WxHyperParameter(object):
     """
