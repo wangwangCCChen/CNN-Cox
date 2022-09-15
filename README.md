@@ -1,6 +1,6 @@
 # CNN-Cox
 
-CNN-Cox: CNN-based survial prediction model combining with prognosis-related cascaded Wx feature selection 
+A convolutional neural network model for survival prediction based on prognosis-related cascaded Wx feature selection 
 
 Get Started
 
